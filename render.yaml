@@ -6,7 +6,8 @@ services:
     repo: https://github.com/Cids08/figma
     branch: main
     dockerfilePath: Dockerfile
-    buildCommand: ""
+    buildCommand: "composer install --no-dev --optimize-autoloader"  # Add if you need to install dependencies
+    startCommand: "service nginx start && php-fpm"  # Start both Nginx and PHP-FPM
     envVars:
       - key: APP_ENV
         value: production
@@ -25,4 +26,4 @@ services:
       - key: DB_USERNAME
         value: root
       - key: DB_PASSWORD
-        value: ""
+        value: ""  # Update if necessary
