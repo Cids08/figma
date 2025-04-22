@@ -1,6 +1,7 @@
+# Use the official PHP image with FPM
 FROM php:8.2-fpm
 
-# Install system dependencies
+# Install system dependencies and Nginx
 RUN apt-get update && apt-get install -y \
     nginx \
     git \
@@ -18,11 +19,14 @@ RUN apt-get update && apt-get install -y \
 # Install Composer (to manage Laravel dependencies)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
+# Set the working directory inside the container
 WORKDIR /var/www
 
-# Copy app source code into the container
+# Copy the application source code into the container
 COPY . .
+
+# Install Laravel dependencies using Composer (ensure that all necessary packages are installed)
+RUN composer install --no-dev --optimize-autoloader
 
 # Copy the Nginx configuration file
 COPY default.conf /etc/nginx/conf.d/default.conf
@@ -34,5 +38,5 @@ RUN chmod -R 775 storage bootstrap/cache && \
 # Expose port 80 for web traffic
 EXPOSE 80
 
-# Start Nginx and PHP-FPM
+# Start both Nginx and PHP-FPM
 CMD service nginx start && php-fpm
