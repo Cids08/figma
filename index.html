@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --light-bg: #f8fafc;
+            --dark-bg: #0f172a;
+            --light-card: #ffffff;
+            --dark-card: #1e293b;
+            --light-text: #334155;
+            --dark-text: #e2e8f0;
+            --border-light: #e2e8f0;
+            --border-dark: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--light-text);
+        }
+
+        body.dark {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 0;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 3px solid white;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .user-section {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: white;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .user-info {
+            flex-grow: 1;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background-color: var(--light-card);
+            box-shadow: var(--shadow);
+        }
+
+        body.dark .header {
+            background-color: var(--dark-card);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 1.25rem;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .header-actions button {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 1.25rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Content */
+        .content {
+            padding: 2rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .section-title {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--light-card);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        body.dark .card {
+            background-color: var(--dark-card);
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        body.dark .stat-icon {
+            background-color: rgba(37, 99, 235, 0.2);
+        }
+
+        .stat-content {
+            flex-grow: 1;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--secondary);
+            font-size: 0.875rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background-color: var(--light-card);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        body.dark .table-container {
+            background-color: var(--dark-card);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        body.dark th, body.dark td {
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        body.dark tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-align: center;
+            width: fit-content;
+        }
+
+        .status-borrowed {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .status-available {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .status-reserved {
+            background-color: rgba(234, 179, 8, 0.1);
+            color: #eab308;
+        }
+
+        body.dark .status-borrowed {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+        body.dark .status-available {
+            background-color: rgba(34, 197, 94, 0.2);
+        }
+
+        body.dark .status-reserved {
+            background-color: rgba(234, 179, 8, 0.2);
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .action-btn.secondary {
+            background-color: var(--secondary);
+        }
+
+        .search-bar {
+            display: flex;
+            margin-bottom: 1.5rem;
+            background-color: var(--light-card);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        body.dark .search-bar {
+            background-color: var(--dark-card);
+        }
+
+        .search-bar input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: inherit;
+        }
+
+        .search-bar button {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            background-color: var(--light-card);
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        body.dark .filter-pill {
+            background-color: var(--dark-card);
+        }
+
+        .filter-pill.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Book Screen Specific */
+        .book-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-cover {
+            height: 180px;
+            background-color: rgba(0,0,0,0.05);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+        }
+
+        body.dark .book-cover {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .book-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .book-author {
+            color: var(--secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .book-meta {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Borrow/Return Screen */
+        .scan-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 0;
+        }
+
+        .qr-container {
+            width: 200px;
+            height: 200px;
+            background-color: var(--light-card);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        body.dark .qr-container {
+            background-color: var(--dark-card);
+        }
+
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            background-color: rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.dark .qr-code {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .scan-instructions {
+            text-align: center;
+            max-width: 400px;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            background-color: var(--light-card);
+            color: var(--light-text);
+        }
+
+        body.dark .form-control {
+            border-color: var(--border-dark);
+            background-color: var(--dark-card);
+            color: var(--dark-text);
+        }
+
+        /* Login/Signup Screen */
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: var(--light-card);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        body.dark .auth-container {
+            background-color: var(--dark-card);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        body.dark .auth-tabs {
+            border-bottom-color: var(--border-dark);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            color: var(--secondary);
+        }
+
+        .auth-tab.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        /* Settings Screen */
+        .settings-card {
+            background-color: var(--light-card);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        body.dark .settings-card {
+            background-color: var(--dark-card);
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .settings-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-right: 1rem;
+        }
+
+        body.dark .settings-icon {
+            background-color: rgba(37, 99, 235, 0.2);
+        }
+
+        .settings-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .settings-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        body.dark .settings-option {
+            border-bottom-color: var(--border-dark);
+        }
+
+        .settings-option:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        input:focus + .toggle-slider {
+            box-shadow: 0 0 1px var(--primary);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                height: 100vh;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo">
+                    <i class="fas fa-book-reader"></i>
+                    <span>LibraryPro</span>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a class="nav-item active" data-screen="dashboard">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a class="nav-item" data-screen="books">
+                    <i class="fas fa-book"></i>
+                    <span>Books</span>
+                </a>
+                <a class="nav-item" data-screen="members">
+                    <i class="fas fa-users"></i>
+                    <span>Members</span>
+                </a>
+                <a class="nav-item" data-screen="borrow-return">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Borrow/Return</span>
+                </a>
+                <a class="nav-item" data-screen="search">
+                    <i class="fas fa-search"></i>
+                    <span>Search</span>
+                </a>
+                <a class="nav-item" data-screen="admin">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Admin</span>
+                </a>
+                <a class="nav-item" data-screen="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </a>
+                <a class="nav-item" data-screen="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Help/Settings</span>
+                </a>
+            </div>
+            <div class="user-section">
+                <div class="user-avatar">JD</div>
+                <div class="user-info">
+                    <div class="user-name">John Doe</div>
+                    <div class="user-role">Librarian</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="header-title">Dashboard</h2>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button id="darkModeToggle">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <button>
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Dashboard Screen -->
+                <div class="screen active" id="dashboard">
+                    <h3 class="section-title">Dashboard Overview</h3>
+                    <div class="card-grid">
+                        <div class="card stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">2,456</div>
+                                <div class="stat-label">Total Books</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">873</div>
+                                <div class="stat-label">Active Members</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">142</div>
+                                <div class="stat-label">Books Borrowed</div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">24</div>
+                                <div class="stat-label">Overdue Returns</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="section-title">Recent Activities</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Member</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>The Great Gatsby</td>
+                                    <td>Sarah Johnson</td>
+                                    <td>Apr 21, 2025</td>
+                                    <td>Borrowed</td>
+                                    <td><span class="status status-borrowed">Borrowed</span></td>
+                                </tr>
+                                <tr>
+                                    <td>To Kill a Mockingbird</td>
+                                    <td>Michael Smith</td>
+                                    <td>Apr 20, 2025</td>
+                                    <td>Returned</td>
+                                    <td><span class="status status-available">Available</span></td>
+                                </tr>
+                                <tr>
+                                    <td>1984</td>
+                                    <td>Emily Davis</td>
+                                    <td>Apr 19, 2025</td>
+                                    <td>Reserved</td>
+                                    <td><span class="status status-reserved">Reserved</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Pride and Prejudice</td>
+                                    <td>James Wilson</td>
+                                    <td>Apr 18, 2025</td>
+                                    <td>Borrowed</td>
+                                    <td><span class="status status-borrowed">Borrowed</span></td>
+                                </tr>
+                                <tr>
+                                    <td>The Catcher in the Rye</td>
+                                    <td>Linda Martinez</td>
+                                    <td>Apr 17, 2025</td>
+                                    <td>Returned</td>
+                                    <td><span class="status status-available">Available</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Books Screen -->
+                <div class="screen" id="books">
+                    <h3 class="section-title">Book Collection</h3>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search for books...">
+                        <button><i class="fas fa-search"></i></button>
+                    </div>
+                    <div class="filter-section">
+                        <div class="filter-pill active">All Books</div>
+                        <div class="filter-pill">Fiction</div>
+                        <div class="filter-pill">Non-Fiction</div>
+                        <div class="filter-pill">Recently Added</div>
+                        <div class="filter-pill">Available Now</div>
+                    </div>
+                    <div class="card-grid">
+                        <div class="card book-card">
+                            <div class="book-cover">
+                                <i class="fas fa-book fa-3x"></i>
+                            </div>
+                            <div class="book-title">The Great Gatsby</div>
+                            <div class="book-author">F. Scott Fitzgerald</div>
+                            <div class="book-meta">
+                                <span class="status status-borrowed">Borrowed</span>
+                                <button class="action-btn">Details</button>
+                            </div>
+                        </div>
+                        <div class="card book-card">
+                            <div class="book-cover">
+                                <i class="fas fa-book fa-3x"></i>
+                            </div>
+                            <div class="book-title">To Kill a Mockingbird</div>
+                            <div class="book-author">Harper Lee</div>
+                            <div class="book-meta">
+                                <span class="status status-available">Available</span>
+                                <button class="action-btn">Details</button>
+                            </div>
+                        </div>
+                        <div class="card book-card">
+                            <div class="book-cover">
+                                <i class="fas fa-book fa-3x"></i>
+                            </div>
+                            <div class="book-title">1984</div>
+                            <div class="book-author">George Orwell</div>
+                            <div class="book-meta">
+                                <span class="status status-reserved">Reserved</span>
+                                <button class="action-btn">Details</button>
+                            </div>
+                        </div>
+                        <div class="card book-card">
+                            <div class="book-cover">
+                                <i class="fas fa-book fa-3x"></i>
+                            </div>
+                            <div class="book-title">Pride and Prejudice</div>
+                            <div class="book-author">Jane Austen</div>
+                            <div class="book-meta">
+                                <span class="status status-borrowed">Borrowed</span>
+                                <button class="action-btn">Details</button>
+                            </div>
+                        </div>
+                        <div class="card book-card">
+                            <div class="book-cover">
+                                <i class="fas fa-book fa-3x"></i>
+                            </div>
+                            <div class="book-title">The Catcher in the Rye</div>
+                            <div class="book-author">J.D. Salinger</div>
+                            <div class="book-meta">
+                                <span class="status status-available">Available</span>
+                                <button class="action-btn">Details</button>
+                            </div>
+                        </div>
+                        <div class="card book-card">
+                            <div class="book-cover">
+                                <i class="fas fa-book fa-3x"></i>
+                            </div>
+                            <div class="book-title">The Hobbit</div>
+                            <div class="book-author">J.R.R. Tolkien</div>
+                            <div class="book-meta">
+                                <span class="status status-available">Available</span>
+                                <button class="action-btn">Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Members Screen -->
+                <div class="screen" id="members">
+                    <h3 class="section-title">Library Members</h3>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search for members...">
+                        <button><i class="fas fa-search"></i></button>
+                    </div>
+                    <div class="filter-section">
+                        <div class="filter-pill active">All Members</div>
+                        <div class="filter-pill">Active</div>
+                        <div class="filter-pill">New</div>
