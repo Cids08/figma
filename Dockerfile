@@ -25,7 +25,7 @@ WORKDIR /var/www
 COPY . .
 
 # Copy Nginx config
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY default.conf /etc/nginx/conf.d/default.conf
 
 # Set permissions
 RUN chmod -R 775 storage bootstrap/cache && \
