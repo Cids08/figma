@@ -1,20 +1,23 @@
-<?php
+server {
+    listen 80;
+    index index.php index.html;
+    root /var/www/public;  # Points to the "public" directory in Laravel
 
-use Illuminate\Foundation\Application;
-use Illuminate\Http\Request;
+    # Handling the requests
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;  # Ensures Laravel handles the routing
+    }
 
-define('LARAVEL_START', microtime(true));
+    # PHP handling
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
 
-// Determine if the application is in maintenance mode...
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
-    require $maintenance;
+    location ~ /\.ht {
+        deny all;
+    }
 }
 
-// Register the Composer autoloader...
-require __DIR__.'/../vendor/autoload.php';
-
-// Bootstrap Laravel and handle the request...
-/** @var Application $app */
-$app = require_once __DIR__.'/../bootstrap/app.php';
-
-$app->handleRequest(Request::capture());
