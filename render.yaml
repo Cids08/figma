@@ -6,7 +6,7 @@ services:
     repo: https://github.com/Cids08/figma
     branch: main
     dockerfilePath: Dockerfile
-    buildCommand: ""  # Optional, can be left empty if Dockerfile handles it
+    buildCommand: ""
     envVars:
       - key: APP_ENV
         value: production
