@@ -18,7 +18,7 @@ services:
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST
-        value: 127.0.0.1
+        value: sres-mysql
       - key: DB_PORT
         value: 3306
       - key: DB_DATABASE
