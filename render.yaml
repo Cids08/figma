@@ -6,8 +6,7 @@ services:
     repo: https://github.com/Cids08/figma
     branch: main
     dockerfilePath: Dockerfile
-    buildCommand: ""
-    startCommand: php artisan serve --host=0.0.0.0 --port=8000
+    buildCommand: ""  # Optional, can be left empty if Dockerfile handles it
     envVars:
       - key: APP_ENV
         value: production
